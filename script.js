@@ -1,5 +1,9 @@
 document.addEventListener("DOMContentLoaded", function () {
-    const toggleButton = document.querySelector(".toggle-button");
+    const toggleButton = document.createElement("button");
+    toggleButton.classList.add("toggle-button");
+    toggleButton.innerHTML = "☰"; 
+    document.body.appendChild(toggleButton);
+
     const sidebar = document.querySelector(".sidebar");
     
     toggleButton.addEventListener("click", function () {
@@ -11,24 +15,11 @@ document.addEventListener("DOMContentLoaded", function () {
         dropdown.addEventListener("click", function (e) {
             e.preventDefault();
             const dropdownMenu = this.nextElementSibling;
-            const isOpen = dropdownMenu.style.display === "block";
-            dropdownMenu.style.display = isOpen ? "none" : "block";
-            this.setAttribute("aria-expanded", !isOpen);
+            dropdownMenu.style.display = dropdownMenu.style.display === "block" ? "none" : "block";
         });
     });
 
-    const dropdownItems = document.querySelectorAll(".dropdown-item");
-    const displayedImage = document.getElementById("displayed-image");
-
-    dropdownItems.forEach(item => {
-        item.addEventListener("click", function () {
-            const imgSrc = this.getAttribute("data-img");
-            displayedImage.src = imgSrc;
-            displayedImage.style.display = "block";
-        });
-    });
-
-    // Close dropdowns when clicking outside
+   
     document.addEventListener("click", function (e) {
         if (!sidebar.contains(e.target) && !toggleButton.contains(e.target)) {
             const allDropdowns = document.querySelectorAll(".dropdown");
@@ -36,3 +27,4 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 });
+
