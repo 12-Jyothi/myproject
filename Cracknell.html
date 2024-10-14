@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responsive Sidebar Menu</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="sidebar">
+        <h2>Navigation</h2>
+        <ul>
+            <li>
+                <a href="#" class="dropdown-toggle" aria-haspopup="true" aria-expanded="false">Project Information</a>
+                <ul class="dropdown">
+                    <li class="dropdown-content">
+                        <div class="dropdown-item">Client-XXX</div>
+                        <div class="dropdown-item">Revit Version-20XX</div>
+                        <div class="dropdown-item">Project Name-Project</div>
+                        <div class="dropdown-item">Project Number -00000</div>
+                        <div class="dropdown-item">Project Address-Address</div>
+                        <div class="dropdown-item">Project Stage-Status</div>
+                        <div class="dropdown-item">Project Issue Date-xx/xx/xx</div>
+                        <div class="dropdown-item">Project Director-director</div> 
+                        <div class="dropdown-item">Project Leader-Leader</div> 
+                        <div class="dropdown-item">Team-team</div> 
+                        <div class="dropdown-item">Description-Description</div> 
+                    </li>
+                </ul>
+            </li>
+            <li>
+                <a href="#sheets" class="dropdown-toggle" aria-haspopup="true" aria-expanded="false">Sheets</a>
+                <ul class="dropdown">
+                    <li class="dropdown-content">
+                        <div class="dropdown-item" data-img="images/sheet1.png">Sheet 1</div>
+                        <div class="dropdown-item" data-img="images/sheet2.png">Sheet 2</div>
+                        <div class="dropdown-item" data-img="images/sheet3.png">Sheet 3</div>
+                    </li>
+                </ul>
+            </li>
+            <li><a href="#workset-configuration">Workset Configuration</a></li>
+            <li><a href="#family-browser">Family Browser</a></li>
+            <li><a href="#group-browser">Group Browser</a></li>
+            <li><a href="#links">Links</a></li>
+            <li><a href="#warnings">Warnings</a></li>
+            <li><a href="#other-file-info">Other File Information</a></li>
+        </ul>
+    </div>
+
+    <button class="toggle-button">☰</button>
+
+    <div class="content">
+        <div id="project-info"></div>
+        <div id="sheets"></div>
+        <div id="workset-configuration"></div>
+        <div id="family-browser"></div>
+        <div id="group-browser"></div>
+        <div id="links"></div>
+        <div id="warnings"></div>
+        <div id="other-file-info"></div>
+
+        <img id="displayed-image" src="" alt="Selected Image" style="display: none; margin-top: 20px; max-width: 100%;">
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
