@@ -1,0 +1,19 @@
+<SidebarMenu>
+    <ProjectInformation>
+        <Client>ABC Corporation</Client>
+        <RevitVersion>2024</RevitVersion>
+        <ProjectName>Architectural Design</ProjectName>
+        <ProjectNumber>123456</ProjectNumber>
+        <ProjectAddress>City Center, Downtown</ProjectAddress>
+        <ProjectStage>In Progress</ProjectStage>
+        <ProjectIssueDate>January 1, 2024</ProjectIssueDate>
+        <ProjectDirector>John Smith</ProjectDirector>
+        <ProjectLeader>Emily Johnson</ProjectLeader>
+        <Team>Team A</Team>
+        <Description>Regular updates will be provided bi-weekly. Any changes in project scope will require stakeholder approval.</Description>
+    </ProjectInformation>
+   
+</SidebarMenu>
+
+
+
