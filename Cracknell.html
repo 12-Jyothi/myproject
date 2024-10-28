@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responsive Sidebar Menu</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            display: flex;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        .sidebar {
+            width: 45px; 
+            background-color: rgb(70, 69, 69);
+            color: white;
+            height: 100vh;
+            overflow: auto;
+            transition: width 0.3s;
+        }
+
+        .sidebar.expanded {
+            width: 250px; 
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            margin: 0;
+            padding: 10px;
+            display: none; 
+        }
+
+        .sidebar.expanded h2 {
+            display: block; 
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebar ul li {
+            padding: 15px;
+            cursor: pointer;
+            white-space: nowrap; 
+        }
+
+        .sidebar ul li a {
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+
+        .sidebar ul li a i {
+            min-width: 30px; 
+        }
+
+        .dropdown {
+            display: none; 
+            padding-left: 20px;
+        }
+
+        .content {
+            padding: 20px;
+            flex-grow: 1;
+            display: none; 
+        }
+
+        .content.active {
+            display: block; 
+        }
+
+        .sidebar.expanded .dropdown {
+            display: block; 
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>Navigation</h2>
+        <ul>
+            <li>
+                <a href="#project-info" class="nav-link"><i class="fas fa-info-circle"></i> <span class="text">Project Information</span></a>
+            </li>
+            <li>
+                <a href="#sheets" class="nav-link"><i class="fas fa-file-alt"></i> <span class="text">Sheets</span></a>
+                <ul class="dropdown">
+                    <li class="dropdown-content"></li>
+                </ul>
+            </li>
+            <li><a href="#workset-configuration" class="nav-link"><i class="fas fa-cogs"></i> <span class="text">Workset Configuration</span></a></li>
+            <li><a href="#family-browser" class="nav-link"><i class="fas fa-archive"></i> <span class="text">Family Browser</span></a></li>
+            <li><a href="#group-browser" class="nav-link"><i class="fas fa-users"></i> <span class="text">Group Browser</span></a></li>
+            <li><a href="#links" class="nav-link"><i class="fas fa-link"></i> <span class="text">Links</span></a></li>
+            <li><a href="#warnings" class="nav-link"><i class="fas fa-exclamation-triangle"></i> <span class="text">Warnings</span></a></li>
+            <li><a href="#other-file-info" class="nav-link"><i class="fas fa-file"></i> <span class="text">Other File Information</span></a></li>
+        </ul>
+    </div>
+
+    <div class="content active" id="project-info">
+        <h2>Project Information</h2>
+        <div class="project-detail">Client: <span id="client"></span></div>
+        <div class="project-detail">Revit Version: <span id="revit-version"></span></div>
+        <div class="project-detail">Project Name: <span id="project-name"></span></div>
+        <div class="project-detail">Project Number: <span id="project-number"></span></div>
+        <div class="project-detail">Project Address: <span id="project-address"></span></div>
+        <div class="project-detail">Project Stage: <span id="project-stage"></span></div>
+        <div class="project-detail">Project Issue Date: <span id="issue-date"></span></div>
+        <div class="project-detail">Project Director: <span id="project-director"></span></div> 
+        <div class="project-detail">Project Leader: <span id="project-leader"></span></div> 
+        <div class="project-detail">Team: <span id="project-team"></span></div> 
+        <div class="project-detail">Description: <span id="project-description"></span></div> 
+    </div>
+
+    <div class="content" id="sheets">
+        <h2>Sheets</h2>
+        <img id="displayed-image" src="" alt="Selected Image" style="display: none; margin-top: 20px; max-width: 100%;">
+    </div>
+
+    <div class="content" id="workset-configuration">Workset Configuration Content</div>
+    <div class="content" id="family-browser">Family Browser Content</div>
+    <div class="content" id="group-browser">Group Browser Content</div>
+    <div class="content" id="links">Links Content</div>
+    <div class="content" id="warnings">Warnings Content</div>
+    <div class="content" id="other-file-info">Other File Information Content</div>
+
+    <script>
+        const loadProjectInfo = () => {
+            fetch('https://raw.githubusercontent.com/12-Jyothi/myproject/main/project-info.xml')
+                .then(response => response.text())
+                .then(data => {
+                    const parser = new DOMParser();
+                    const xml = parser.parseFromString(data, 'application/xml');
+
+                    document.getElementById('client').textContent = xml.getElementsByTagName('client')[0].textContent;
+                    document.getElementById('revit-version').textContent = xml.getElementsByTagName('revit_version')[0].textContent;
+                    document.getElementById('project-name').textContent = xml.getElementsByTagName('name')[0].textContent;
+                    document.getElementById('project-number').textContent = xml.getElementsByTagName('number')[0].textContent;
+                    document.getElementById('project-address').textContent = xml.getElementsByTagName('address')[0].textContent;
+                    document.getElementById('project-stage').textContent = xml.getElementsByTagName('stage')[0].textContent;
+                    document.getElementById('issue-date').textContent = xml.getElementsByTagName('issue_date')[0].textContent;
+                    document.getElementById('project-director').textContent = xml.getElementsByTagName('director')[0].textContent;
+                    document.getElementById('project-leader').textContent = xml.getElementsByTagName('leader')[0].textContent;
+                    document.getElementById('project-team').textContent = xml.getElementsByTagName('team')[0].textContent;
+                    document.getElementById('project-description').textContent = xml.getElementsByTagName('description')[0].textContent;
+                })
+                .catch(error => console.error('Error loading project info:', error));
+        };
+
+        document.addEventListener("DOMContentLoaded", function () {
+            loadProjectInfo(); 
+
+            const dropdownContent = document.querySelector('.dropdown-content');
+            const baseImageUrl = "https://raw.githubusercontent.com/12-Jyothi/myproject/main/";
+
+            const imageExists = async (url) => {
+                const response = await fetch(url, { method: 'HEAD' });
+                return response.ok;
+            };
+
+            const generateDropdownItems = async () => {
+                for (let i = 1; i <= 100; i++) { 
+                    const pngUrl = `${baseImageUrl}sheet${i}.png`;
+                    const jpgUrl = `${baseImageUrl}sheet${i}.jpg`;
+                    const pngJpgUrl = `${baseImageUrl}sheet${i}.png.jpg`;
+
+                    if (await imageExists(pngUrl)) {
+                        const div = document.createElement('div');
+                        div.classList.add('dropdown-item');
+                        div.setAttribute('data-img', pngUrl);
+                        div.textContent = `Sheet ${i} (PNG)`;
+                        dropdownContent.appendChild(div);
+                    } 
+                    else if (await imageExists(jpgUrl)) {
+                        const div = document.createElement('div');
+                        div.classList.add('dropdown-item');
+                        div.setAttribute('data-img', jpgUrl);
+                        div.textContent = `Sheet ${i} (JPG)`;
+                        dropdownContent.appendChild(div);
+                    }
+                    else if (await imageExists(pngJpgUrl)) {
+                        const div = document.createElement('div');
+                        div.classList.add('dropdown-item');
+                        div.setAttribute('data-img', pngJpgUrl);
+                        div.textContent = `Sheet ${i} (PNG.JPG)`;
+                        dropdownContent.appendChild(div);
+                    } else {
+                        break; 
+                    }
+                }
+            };
+
+            generateDropdownItems();
+
+            dropdownContent.addEventListener('click', function (event) {
+                if (event.target.classList.contains('dropdown-item')) {
+                    const imgSrc = event.target.getAttribute('data-img');
+                    const displayedImage = document.getElementById('displayed-image');
+                    displayedImage.src = imgSrc;
+                    displayedImage.style.display = 'block'; 
+                }
+            });
+
+            const navLinks = document.querySelectorAll('.nav-link');
+            const contents = document.querySelectorAll('.content');
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', (event) => {
+                    event.preventDefault(); 
+                    const targetId = link.getAttribute('href').substring(1); 
+                    contents.forEach(content => {
+                        content.classList.remove('active'); 
+                    });
+                    document.getElementById(targetId).classList.add('active'); 
+                });
+            });
+
+            document.querySelectorAll('.sidebar ul li > a').forEach(item => {
+                item.addEventListener('click', (event) => {
+                    const nextDropdown = item.nextElementSibling;
+                    if (nextDropdown && nextDropdown.classList.contains('dropdown')) {
+                        nextDropdown.style.display = nextDropdown.style.display === 'block' ? 'none' : 'block';
+                    }
+                });
+            });
+
+            const sidebar = document.querySelector('.sidebar');
+            sidebar.addEventListener('mouseover', () => {
+                sidebar.classList.add('expanded');
+            });
+            sidebar.addEventListener('mouseout', () => {
+                sidebar.classList.remove('expanded');
+            });
+        });
+    </script>
+</body>
+</html>
