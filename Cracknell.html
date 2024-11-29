@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responsive Sidebar Menu</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+
+body {
+    margin: 0;
+    display: flex;
+    font-family: Arial, sans-serif;
+}
+
+canvas {
+    display: block;
+}
+
+.sidebar {
+    position: fixed;
+    width: 65px;
+    background-color: rgb(70, 69, 69);
+    color: white;
+    height: 100vh;
+    overflow: auto;
+    transition: width 0.3s;
+    z-index: 1000;
+}
+
+.sidebar.expanded {
+    width: 250px;
+}
+
+.sidebar h2 {
+    text-align: center;
+    margin: 0;
+    padding: 10px;
+    display: none;
+}
+
+.sidebar.expanded h2 {
+    display: block;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+}
+
+.sidebar ul li {
+    padding: 15px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.sidebar ul li a {
+    color: white;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+}
+
+.sidebar ul li a i {
+    min-width: 30px;
+    margin-left: 15px;
+    margin-right: 10px;
+}
+
+.dropdown-item {
+    padding: 10px;
+    color: #ddbdbd;
+    cursor: pointer;
+}
+
+.dropdown-item:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.content {
+    margin-left: 65px;
+    padding: 20px;
+    flex-grow: 1;
+    display: none;
+    overflow: hidden;
+}
+
+.sidebar.expanded + .content {
+    margin-left: 250px;
+}
+
+.content.active {
+    display: block;
+}
+
+.project-info-container {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 10px;
+    margin-top: 10px;
+    border: 1px solid #ccc;
+}
+
+.project-detail {
+    margin-bottom: 10px;
+    border-bottom: 1px solid #ddd;
+    padding: 8px;
+}
+
+.project-detail:nth-child(odd) {
+    background-color: #f9f9f9;
+}
+
+.project-detail span {
+    font-weight: bold;
+}
+
+.project-detail:first-child {
+    border-top: 1px solid #ddd;
+}
+
+.project-info-container:last-child {
+    border-bottom: none;
+}
+
+.zoom-controls {
+    margin-bottom: 10px;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    gap: 5px;
+    z-index: 10;
+}
+
+.zoom-button {
+    background-color: rgb(70, 69, 69);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.zoom-button:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.image-container {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90vw;
+    height: 100vh;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    cursor: crosshair;
+    z-index: 999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#displayed-image {
+    width: 100%;
+    height: auto;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+}
+
+#drawing-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 2;
+}
+
+#drawing-canvas.drawing {
+    pointer-events: all;
+}
+
+#image-preview-container {
+    overflow: hidden;
+    text-align: center;
+}
+
+#image-preview {
+    max-width: 200%;
+    max-height: 100%;
+    margin-top: 10px;
+    margin-left: 55px;
+    
+}
+
+#image-history {
+    margin-top: 30px;
+    font-size: small;
+    right: 17;
+    margin-left: 105px; 
+}
+
+
+#history-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    overflow-y: auto;  /* Ensure images can scroll vertically */
+    max-height: 100%; /* Ensure it doesn't exceed the parent container */
+}
+
+.history-thumbnail {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    cursor: pointer;
+    border: 2px solid #ccc;
+    border-radius: 5px;
+    transition: transform 0.2s ease;
+}
+
+.history-thumbnail:hover {
+    transform: scale(1.1);
+}
+
+#upload-image {
+    margin-top: 50px;
+    margin-left: 100px; 
+}
+#image-preview-container {
+    margin-top: 20px;
+    text-align: center;
+    
+
+}
+
+#image-preview {
+    max-width: 100%;
+    max-height: 100px; /* Adjust as needed */
+    
+}
+
+
+
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <ul>
+            <li>
+                <a href="#project-info" class="nav-link"><i class="fas fa-info-circle"></i> <span class="text">Project Information</span></a>
+            </li>
+            <li>
+                <a href="#sheets" class="nav-link" id="sheets-link">
+                    <i class="fas fa-file-alt"></i>
+                    <span class="text">Sheets</span>
+                    <i class="fas fa-chevron-down"></i> 
+                </a>
+                <ul class="dropdown">
+                    <div class="dropdown-content"></div>
+                </ul>
+            </li>
+            <li><a href="#workset-configuration" class="nav-link"><i class="fas fa-cogs"></i> <span class="text">Workset Configuration</span></a></li>
+            <li><a href="#family-browser" class="nav-link"><i class="fas fa-archive"></i> <span class="text">Family Browser</span></a></li>
+            <li><a href="#group-browser" class="nav-link"><i class="fas fa-users"></i> <span class="text">Group Browser</span></a></li>
+            <li><a href="#links" class="nav-link"><i class="fas fa-link"></i> <span class="text">Links</span></a></li>
+            <li><a href="#warnings" class="nav-link"><i class="fas fa-exclamation-triangle"></i> <span class="text">Warnings</span></a></li>
+            <li><a href="#other-file-info" class="nav-link"><i class="fas fa-file"></i> <span class="text">Other File Information</span></a></li>
+            <li><a href="#3d-viewer" class="nav-link"><i class="fas fa-cube"></i> <span class="text">3D Viewer</span></a></li>
+        </ul>
+    </div>
+
+    <div class="content active" id="project-info">
+        <h2>Project Information</h2>
+        <div class="project-info-container">
+            <div class="project-detail">Client:</div>
+            <div class="project-detail"><span id="client"></span></div>
+            <div class="project-detail">Revit Version:</div>
+            <div class="project-detail"><span id="revit-version"></span></div>
+            <div class="project-detail">Project Name:</div>
+            <div class="project-detail"><span id="project-name"></span></div>
+            <div class="project-detail">Project Number:</div>
+            <div class="project-detail"><span id="project-number"></span></div>
+            <div class="project-detail">Project Address:</div>
+            <div class="project-detail"><span id="project-address"></span></div>
+            <div class="project-detail">Project Stage:</div>
+            <div class="project-detail"><span id="project-stage"></span></div>
+            <div class="project-detail">Project Issue Date:</div>
+            <div class="project-detail"><span id="issue-date"></span></div>
+            <div class="project-detail">Project Director:</div>
+            <div class="project-detail"><span id="project-director"></span></div> 
+            <div class="project-detail">Project Leader:</div>
+            <div class="project-detail"><span id="project-leader"></span></div> 
+            <div class="project-detail">Team:</div>
+            <div class="project-detail"><span id="project-team"></span></div> 
+            <div class="project-detail">Description:</div>
+            <div class="project-detail"><span id="project-description"></span></div> 
+        </div>
+    </div>
+
+    <div class="content" id="sheets">
+        <h2>Sheets</h2>
+        <div class="zoom-controls">
+            <button id="zoom-in" class="zoom-button"><i class="fas fa-search-plus"></i></button>
+            <button id="zoom-out" class="zoom-button"><i class="fas fa-search-minus"></i></button>
+            <!-- Inside the #zoom-controls div -->
+
+
+        </div>
+      
+        <div class="image-container">
+            <img id="displayed-image" src="" alt="Sheet Image">
+              <canvas id="drawing-canvas"></canvas>
+        </div>
+    </div>
+
+    <div class="content" id="workset-configuration">Workset Configuration Content</div>
+    <div class="content" id="family-browser">Family Browser Content</div>
+    <div class="content" id="group-browser">Group Browser Content</div>
+    <div class="content" id="links">Links Content</div>
+    <div class="content" id="warnings">Warnings Content</div>
+    <div class="content" id="other-file-info">Other File Information Content</div>
+    
+    <div id="controls">
+       
+        <button id="upload-image">Upload Image</button> <!-- Add this button -->
+        <input type="file" id="image-upload-input" style="display: none;" accept="image/*" />
+        <div id="image-history">
+            <p>Image Preview</p>
+            <div id="history-list"></div>
+        </div>
+        <div id="image-preview-container">
+            <img id="image-preview" src="" alt="">
+        </div>
+
+       
+        <!-- Image Display Section -->
+       
+         <!-- Hidden file input -->
+    </div>
+    <!-- Sidebar for Image Preview and History -->
+
+    
+
+  
+    <div class="content" id="3d-viewer">
+        <h2>3D Viewer</h2>
+        <p></p>
+        <div id="viewer-container">
+            <canvas id="3d-canvas"></canvas>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+   
+    <script>
+ 
+
+
+        const loadProjectInfo = () => {
+            fetch('https://raw.githubusercontent.com/12-Jyothi/myproject/main/project-info.xml')
+                .then(response => response.text())
+                .then(data => {
+                    const parser = new DOMParser();
+                    const xml = parser.parseFromString(data, 'application/xml');
+
+                    document.getElementById('client').textContent = xml.getElementsByTagName('client')[0].textContent;
+                    document.getElementById('revit-version').textContent = xml.getElementsByTagName('revit_version')[0].textContent;
+                    document.getElementById('project-name').textContent = xml.getElementsByTagName('name')[0].textContent;
+                    document.getElementById('project-number').textContent = xml.getElementsByTagName('number')[0].textContent;
+                    document.getElementById('project-address').textContent = xml.getElementsByTagName('address')[0].textContent;
+                    document.getElementById('project-stage').textContent = xml.getElementsByTagName('stage')[0].textContent;
+                    document.getElementById('issue-date').textContent = xml.getElementsByTagName('issue_date')[0].textContent;
+                    document.getElementById('project-director').textContent = xml.getElementsByTagName('director')[0].textContent;
+                    document.getElementById('project-leader').textContent = xml.getElementsByTagName('leader')[0].textContent;
+                    document.getElementById('project-team').textContent = xml.getElementsByTagName('team')[0].textContent;
+                    document.getElementById('project-description').textContent = xml.getElementsByTagName('description')[0].textContent;
+                })
+                .catch(error => console.error('Error loading project info:', error));
+        };
+
+       
+        document.addEventListener("DOMContentLoaded", function () {
+    loadProjectInfo();
+
+    const dropdownContent = document.querySelector('.dropdown-content');
+    const baseImageUrl = "https://raw.githubusercontent.com/12-Jyothi/myproject/main/";
+
+    let zoomLevel = 1;
+    let dropdownVisible = false;
+    let lastX = 0, lastY = 0;
+    let paths = [];
+    let undonePaths = [];
+    let path = [];
+    const canvas = document.getElementById('drawing-canvas');
+    const ctx = canvas.getContext('2d');
+    const image = document.getElementById('displayed-image');
+    const imageContainer = document.querySelector('.image-container');
+    let history = [];  // Declare the history array
+    const historyList = document.getElementById('history-list')
+
+    // Check if the image exists
+    const imageExists = async (url) => {
+        const response = await fetch(url, { method: 'HEAD' });
+        return response.ok;
+    };
+
+    // Adjust canvas size based on the image size and zoom level
+    const adjustCanvasSize = () => {
+        const imageWidth = image.width;
+        const imageHeight = image.height;
+
+        // Update canvas size based on the zoom level
+        canvas.width = imageWidth * zoomLevel;
+        canvas.height = imageHeight * zoomLevel;
+        canvas.style.width = `${imageWidth * zoomLevel}px`;
+        canvas.style.height = `${imageHeight * zoomLevel}px`;
+
+        // Redraw the canvas content
+        redrawCanvas();
+    };
+
+    // Redraw the canvas content
+    const redrawCanvas = () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
+        paths.forEach(path => {
+            ctx.beginPath();
+            ctx.moveTo(path[0].x, path[0].y);
+            path.forEach(point => {
+                ctx.lineTo(point.x, point.y);
+            });
+            ctx.stroke();
+        });
+    };
+
+    // Zoom functionality
+    const updateZoom = () => {
+        image.style.transform = `scale(${zoomLevel})`;
+        canvas.style.transform = `scale(${zoomLevel})`;
+        adjustCanvasSize();
+    };
+
+    // Zoom-in and zoom-out buttons
+    document.getElementById('zoom-in').addEventListener('click', () => {
+        zoomLevel += 0.2;
+        updateZoom();
+    });
+
+    document.getElementById('zoom-out').addEventListener('click', () => {
+        if (zoomLevel > 0.1) {
+            zoomLevel -= 0.1;
+            updateZoom();
+        }
+    });
+
+    // Load image and resize canvas accordingly
+    image.onload = () => {
+        adjustCanvasSize(); // Adjust canvas size after image load
+    };
+
+    // Generate dropdown items based on available images
+    const generateDropdownItems = async () => {
+        for (let i = 1; i <= 100; i++) {
+            const pngUrl = `${baseImageUrl}sheet${i}.png`;
+            const jpgUrl = `${baseImageUrl}sheet${i}.jpg`;
+            const pngJpgUrl = `${baseImageUrl}sheet${i}.png.jpg`;
+
+            if (await imageExists(pngUrl)) {
+                const div = document.createElement('div');
+                div.classList.add('dropdown-item');
+                div.setAttribute('data-img', pngUrl);
+                div.textContent = `Sheet ${i} (PNG)`;
+                dropdownContent.appendChild(div);
+            } else if (await imageExists(jpgUrl)) {
+                const div = document.createElement('div');
+                div.classList.add('dropdown-item');
+                div.setAttribute('data-img', jpgUrl);
+                div.textContent = `Sheet ${i} (JPG)`;
+                dropdownContent.appendChild(div);
+            } else if (await imageExists(pngJpgUrl)) {
+                const div = document.createElement('div');
+                div.classList.add('dropdown-item');
+                div.setAttribute('data-img', pngJpgUrl);
+                div.textContent = `Sheet ${i} (PNG.JPG)`;
+                dropdownContent.appendChild(div);
+            } else {
+                break;
+            }
+        }
+    };
+
+    // Load selected image into the image element
+    dropdownContent.addEventListener('click', function (event) {
+        if (event.target.classList.contains('dropdown-item')) {
+            const imgSrc = event.target.getAttribute('data-img');
+            image.src = imgSrc;
+            image.style.display = 'block';
+
+            image.onload = () => {
+                adjustCanvasSize(); // Adjust canvas size after new image load
+            };
+        }
+    });
+
+    // Initialize the zoom and drag functionality
+    let isDragging = false;
+    let startX, scrollLeft;
+
+    imageContainer.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        imageContainer.classList.add('dragging');
+        startX = e.pageX - imageContainer.offsetLeft;
+        scrollLeft = imageContainer.scrollLeft;
+    });
+
+    imageContainer.addEventListener('mouseleave', () => {
+        isDragging = false;
+        imageContainer.classList.remove('dragging');
+    });
+
+    imageContainer.addEventListener('mouseup', () => {
+        isDragging = false;
+        imageContainer.classList.remove('dragging');
+    });
+
+    imageContainer.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+
+        e.preventDefault();
+        const x = e.pageX - imageContainer.offsetLeft;
+        const walk = (x - startX) * 2;
+        requestAnimationFrame(() => {
+            imageContainer.scrollLeft = scrollLeft - walk;
+        });
+    });
+
+    window.addEventListener('resize', () => {
+        adjustCanvasSize(); // Adjust canvas size on window resize
+    });
+
+    generateDropdownItems(); // Generate dropdown items on DOMContentLoaded
+
+    // Dropdown menu functionality
+    const navLinks = document.querySelectorAll('.nav-link');
+    const contents = document.querySelectorAll('.content');
+
+    navLinks.forEach(link => {
+        link.addEventListener('click', (event) => {
+            event.preventDefault();
+            const targetId = link.getAttribute('href').substring(1); 
+            contents.forEach(content => {
+            content.classList.remove('active'); 
+            
+        });// Get the target content ID
+
+        const targetContent = document.getElementById(targetId);
+        targetContent.classList.add('active'); // Add active class to target content
+        const hideImagePreviewPages = [
+            'workset-configuration',
+            'family-browser',
+            'group-browser',
+            'links',
+            'warnings',
+            'other-file-info',
+            '3d-viewer'
+        ];
+
+        // Check if the target page is in the list of pages where the image preview should be hidden
+        if (hideImagePreviewPages.includes(targetId)) {
+            document.getElementById('image-preview').style.display = 'none'; // Hide the image preview
+        } else {
+            document.getElementById('image-preview').style.display = 'block'; // Show the image preview
+        }
+        // Check if the target is 'project-info' page
+        if (targetId === 'project-info') {
+            // Hide image preview on project info page
+            document.getElementById('image-preview').style.display = 'none';
+            document.getElementById('image-history').textContent = '';
+        }
+
+            if (targetId === 'sheets') {
+                dropdownVisible = !dropdownVisible; // Toggle dropdown visibility
+                dropdownContent.parentElement.style.display = dropdownVisible ? 'block' : 'none';
+                if (dropdownVisible) {
+                    sidebar.classList.add('expanded');
+                } else {
+                    sidebar.classList.remove('expanded');
+                }
+                document.getElementById('upload-image').style.display = 'inline-block'; // Show upload button on Sheets page
+                document.getElementById('image-sidebar').style.display = 'block'; // Show sidebar on Sheets page
+            } else if (targetId === '3d-viewer') {
+                initialize3DViewer(); // Initialize 3D viewer
+                document.getElementById('upload-image').style.display = 'none'; 
+                // Hide upload button on 3D Viewer page
+            } else {
+                dropdownVisible = false;
+                dropdownContent.parentElement.style.display = 'none';
+                sidebar.classList.remove('expanded');
+                document.getElementById('upload-image').style.display = 'none'; // Hide upload button on other pages
+            }
+        });
+    });
+
+    // Sidebar hover effect
+    const sidebar = document.querySelector('.sidebar');
+    sidebar.addEventListener('mouseover', () => {
+        sidebar.classList.add('expanded');
+    });
+
+    sidebar.addEventListener('mouseout', () => {
+        if (!document.getElementById('sheets').classList.contains('active')) {
+            sidebar.classList.remove('expanded');
+        }
+    });
+
+    // 3D Viewer Setup
+    let scene, camera, renderer, model;
+    const initialize3DViewer = () => {
+        const viewerContainer = document.getElementById('viewer-container');
+        viewerContainer.style.display = 'block'; // Show the viewer
+        scene = new THREE.Scene();
+        camera = new THREE.PerspectiveCamera(75, viewerContainer.clientWidth / viewerContainer.clientHeight, 0.1, 1000);
+        renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('3d-canvas'), alpha: true });
+        renderer.setSize(viewerContainer.clientWidth, viewerContainer.clientHeight);
+
+        camera.position.z = 5;
+        scene.background = new THREE.Color(0xaaaaaa);
+        const gridHelper = new THREE.GridHelper(10, 10);
+        scene.add(gridHelper);
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambientLight);
+
+        const pointLight = new THREE.PointLight(0xffffff, 1);
+        pointLight.position.set(10, 10, 10);
+        scene.add(pointLight);
+
+        const loader = new THREE.GLTFLoader();
+        loader.load('https://raw.githubusercontent.com/12-Jyothi/myproject/main/3D%20Model.glb', (gltf) => {
+            model = gltf.scene;
+            scene.add(model);
+        }, undefined, (error) => {
+            console.error('Error loading model:', error);
+        });
+        camera.position.set(0, 2, 5);
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update(); // Update camera controls
+            renderer.render(scene, camera);
+        }
+        animate();
+    };
+
+    // Resize handling for 3D viewer
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // Handle image upload
+    const imageUploadInput = document.getElementById('image-upload-input');
+    const uploadImageButton = document.getElementById('upload-image');
+
+    uploadImageButton.addEventListener('click', () => {
+        imageUploadInput.click();
+    });
+
+    imageUploadInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                image.src = e.target.result;
+                image.onload = () => {
+                    adjustCanvasSize(); // Adjust canvas size after image load
+                };
+
+                // Show image preview in sidebar
+                document.getElementById('image-preview').src = e.target.result;
+                document.getElementById('image-sidebar').style.display = 'block';
+
+                // Add image to history
+                addImageToHistory(e.target.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Add uploaded image to history
+    const addImageToHistory = (imageSrc) => {
+        // Check if the image already exists in history
+        if (history.includes(imageSrc)) return;
+
+        // Add image to history array
+        history.push(imageSrc);
+
+        // Create thumbnail for history
+        const thumbnail = document.createElement('img');
+        thumbnail.src = imageSrc;
+        thumbnail.classList.add('history-thumbnail');
+        thumbnail.addEventListener('click', () => {
+            // Display the clicked image
+            displayedImage.src = imageSrc;
+            imagePreview.src = imageSrc; // Update the preview as well
+        });
+
+        // Append to history list
+        historyList.prepend(thumbnail);
+
+        // Limit history to 10 images
+        if (history.length > 10) {
+            history.shift(); // Remove the first image if more than 10
+            historyList.removeChild(historyList.lastChild);
+        }
+    };
+});
+
+
+
+        
+    </script>
+</body>
+</html>
